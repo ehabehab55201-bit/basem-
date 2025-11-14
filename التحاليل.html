@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التحاليل الطبية</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            background-color: #8cb1ce;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #0d6efd;
+        }
+        .test-card {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 9px 20px rgba(17, 0, 250, 0.555);
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="file"], input[type="text"], input[type="tel"], select, textarea {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        textarea {
+            height: 60px;
+            resize: vertical;
+        }
+        button {
+            background-color: #0d6dfd;
+            color: rgb(255, 255, 255);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0b5dd7;
+        }
+        .preview-container {
+            margin-top: 15px;
+        }
+        .preview-container img {
+            max-width: 100%;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+        }
+        .test-entry {
+            background-color: #e9f0ff;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>التحاليل الطبية</h1>
+
+    <div class="test-card">
+        <label>نوع التحليل</label>
+        <select id="testType">
+            <option value="تحليل دم">تحليل دم</option>
+            <option value="تحليل بول">تحليل بول</option>
+            <option value="تحليل كيمياء الدم">تحليل كيمياء الدم</option>
+            <option value="تحليل هرمونات">تحليل هرمونات</option>
+            <option value="تحاليل أخرى">تحاليل أخرى</option>
+        </select>
+
+        <label>رفع ملف التحليل</label>
+        <input type="file" id="testFile" accept="image/*,.pdf">
+
+        <label>ملاحظة عن التحليل</label>
+        <textarea id="testNote" placeholder="أضف ملاحظتك هنا"></textarea>
+
+        <label>اسم المعمل</label>
+        <input type="text" id="labName" placeholder="أدخل اسم المعمل">
+
+        <label>رقم التواصل</label>
+        <input type="tel" id="labContact" placeholder=" أدخل رقم التواصل المعمل">
+        <button onclick="saveTest()">حفظ التحليل</button>
+    </div>
+
+    <h2>التحاليل المحفوظة</h2>
+    <div id="testList" class="preview-container"></div>
+
+    <script>
+        const testList = document.getElementById('testList');
+
+        function saveTest() {
+            const type = document.getElementById('testType').value;
+            const note = document.getElementById('testNote').value;
+            const labName = document.getElementById('labName').value;
+            const labContact = document.getElementById('labContact').value;
+            const fileInput = document.getElementById('testFile');
+
+            if(fileInput.files.length === 0){
+                alert("من فضلك اختر ملف للتحليل");
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const currentDate = new Date();
+                const dateStr = currentDate.toLocaleDateString('ar-EG');
+                const timeStr = currentDate.toLocaleTimeString('ar-EG');
+
+                // إنشاء عنصر جديد لعرض التحليل
+                const entry = document.createElement('div');
+                entry.className = "test-entry";
+                entry.innerHTML = `
+                    <strong>نوع التحليل:</strong> ${type} <br>
+                    <strong>التاريخ:</strong> ${dateStr} <strong>الوقت:</strong> ${timeStr} <br>
+                    <strong>المعمل:</strong> ${labName} <br>
+                    <strong>رقم التواصل:</strong> ${labContact} <br>
+                    <strong>ملاحظة:</strong> ${note} <br>
+                    <img src="${e.target.result}" alt="تحليل ${type}">
+                `;
+
+                testList.prepend(entry); // عرض أحدث أولاً
+            }
+
+            reader.readAsDataURL(file);
+
+            // مسح الحقول بعد الحفظ
+            document.getElementById('testNote').value = "";
+            document.getElementById('labName').value = "";
+            document.getElementById('labContact').value = "";
+            document.getElementById('testFile').value = "";
+        }
+    </script>
+</body>
+</html>

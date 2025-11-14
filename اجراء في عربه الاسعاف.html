@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إجراءات عربة الإسعاف</title>
+<style>
+    body {
+        font-family: 'Tahoma', sans-serif;
+        direction: rtl;
+        background: linear-gradient(to bottom, #ffe6e6, #fff);
+        margin: 0;
+        padding: 20px;
+    }
+
+    h1 {
+        text-align: center;
+        color: #e60000;
+        font-size: 2em;
+    }
+
+    .section {
+        background: #fff;
+        border-radius: 15px;
+        padding: 20px;
+        margin: 20px 0;
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        border-left: 8px solid #e60000;
+    }
+
+    label {
+        font-weight: bold;
+        margin-top: 10px;
+        display: block;
+    }
+
+    input, select, textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 12px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 1em;
+    }
+
+    button {
+        background-color: #e60000;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1em;
+    }
+
+    button:hover {
+        background-color: #b20000;
+    }
+
+    .case-entry {
+        background: linear-gradient(to right, #ffe6e6, #fff0f0);
+        border-left: 6px solid #e60000;
+        border-radius: 10px;
+        padding: 12px;
+        margin-top: 15px;
+        transition: transform 0.2s;
+    }
+
+    .case-entry:hover {
+        transform: scale(1.02);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
+
+    .case-entry img {
+        max-width: 100%;
+        border-radius: 8px;
+        margin-top: 10px;
+        border: 1px solid #ccc;
+    }
+</style>
+</head>
+<body>
+
+<h1>🚑 إجراءات عربة الإسعاف</h1>
+
+<div class="section">
+    <label>اسم المريض</label>
+    <input type="text" id="patientName" placeholder="أدخل اسم المريض...">
+
+    <div style="display:flex; gap:10px;">
+        <input type="number" id="patientAge" placeholder="العمر">
+    </div>
+
+    <label>الحالة الطبية</label>
+    <input type="text" id="patientCondition" placeholder="مثلاً: حادث سيارة / صدمة / نزيف">
+
+    <label>نوع الإجراء</label>
+    <select id="procedureType">
+        <option value="">اختر نوع الإجراء</option>
+        <option value="CPR">CPR</option>
+        <option value="نقل عاجل">نقل عاجل</option>
+        <option value="تثبيت الكسور">تثبيت الكسور</option>
+        <option value="إسعافات أولية">إسعافات أولية</option>
+        <option value="آخر">آخر</option>
+    </select>
+
+    <label>تعليمات الإسعاف السريعة</label>
+    <textarea id="instructions" placeholder="مثلاً: مراقبة العلامات الحيوية، تثبيت العنق، وضع المريض على الجانب..."></textarea>
+
+    <label>رفع صورة أو فيديو (اختياري)</label>
+    <input type="file" id="mediaFile" accept="image/*,video/*">
+
+    <button onclick="saveEmergencyCase()">حفظ الإجراء</button>
+</div>
+
+<h2>📋 سجل إجراءات الطوارئ</h2>
+<div id="emergencyList"></div>
+
+<script>
+    const emergencyList = document.getElementById('emergencyList');
+
+    function saveEmergencyCase() {
+        const name = document.getElementById('patientName').value;
+        const age = document.getElementById('patientAge').value;
+        const weight = document.getElementById('patientWeight').value;
+        const condition = document.getElementById('patientCondition').value;
+        const procedure = document.getElementById('procedureType').value;
+        const instructions = document.getElementById('instructions').value;
+        const fileInput = document.getElementById('mediaFile');
+
+        if(name.trim() === "") {
+            alert("من فضلك أدخل اسم المريض");
+            return;
+        }
+
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('ar-EG');
+        const timeStr = now.toLocaleTimeString('ar-EG');
+
+        if(fileInput.files.length > 0){
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e){
+                addEmergencyEntry(name, age, weight, condition, procedure, instructions, dateStr, timeStr, e.target.result, file.type);
+            }
+            reader.readAsDataURL(file);
+        } else {
+            addEmergencyEntry(name, age, weight, condition, procedure, instructions, dateStr, timeStr, null, null);
+        }
+
+        document.getElementById('patientName').value = "";
+        document.getElementById('patientAge').value = "";
+        document.getElementById('patientWeight').value = "";
+        document.getElementById('patientCondition').value = "";
+        document.getElementById('procedureType').value = "";
+        document.getElementById('instructions').value = "";
+        document.getElementById('mediaFile').value = "";
+    }
+
+    function addEmergencyEntry(name, age, weight, condition, procedure, instructions, dateStr, timeStr, mediaSrc, mediaType){
+        const entry = document.createElement('div');
+        entry.className = 'case-entry';
+        entry.innerHTML = `
+            <strong>اسم المريض:</strong> ${name} <br>
+            <strong>العمر:</strong> ${age ? age + " سنة" : "غير محدد"} <br>
+            <strong>الوزن:</strong> ${weight ? weight + " كجم" : "غير محدد"} <br>
+            <strong>الحالة الطبية:</strong> ${condition || "غير محددة"} <br>
+            <strong>نوع الإجراء:</strong> ${procedure || "غير محدد"} <br>
+            <strong>تعليمات الإسعاف:</strong> ${instructions || "لا توجد"} <br>
+            <strong>التاريخ:</strong> ${dateStr} - <strong>الوقت:</strong> ${timeStr} <br>
+            ${mediaSrc ? (mediaType.startsWith('video') ? `<video src="${mediaSrc}" controls style="max-width:100%; margin-top:10px;"></video>` : `<img src="${mediaSrc}" alt="صورة/فيديو" />`) : ""}
+        `;
+        emergencyList.prepend(entry);
+    }
+</script>
+
+</body>
+</html>
